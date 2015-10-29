@@ -46,11 +46,19 @@ include:
 {%- set user_group = name -%}
 {%- endif %}
 
-{% for group in user.get('groups', []) %}
-users_{{ name }}_{{ group }}_group:
-  group:
+#{% for group in user.get('groups', []) %}
+#users_{{ name }}_{{ group }}_group:
+#  group:
+#    - name: {{ group }}
+#    - present
+#{% endfor %}
+
+{%- for group, setting in salt['pillar.get']('groups', {}).iteritems() %}
+users_group_{{ group }}:
+  group.{{ setting.state }}:
     - name: {{ group }}
-    - present
+    - gid: {{setting.get('gid')  }}
+    - system: {{ setting.get('system',"False") }}
 {% endfor %}
 
 users_{{ name }}_user:
